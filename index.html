@@ -4,142 +4,32 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Albion Dashboard</title>
-  <style>
-    body { font-family: Arial, sans-serif; background: #1b1b1f; color: #eee; max-width: 900px; margin: 0 auto; padding: 20px; }
-    input, select { padding: 12px; font-size: 16px; border-radius: 6px; border: none; box-sizing: border-box; }
-    input { width: 100%; margin-top: 10px; }
-    .item { display: flex; align-items: center; gap: 12px; padding: 8px; border-bottom: 1px solid #333; cursor: pointer; }
-    .item:hover { background: #2a2a30; }
-    .item img { width: 48px; height: 48px; }
-    .id { color: #999; font-size: 12px; }
-    #precos { background: #25252b; border-radius: 8px; padding: 12px; margin: 16px 0; }
-    table { width: 100%; border-collapse: collapse; margin-top: 8px; }
-    th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid #333; }
-    th { color: #aaa; font-size: 13px; }
-    .melhor { color: #5fd068; font-weight: bold; }
-    .nota { color: #999; font-size: 12px; margin-top: 8px; }
-  </style>
+  <link rel="stylesheet" href="css/estilo.css">
 </head>
 <body>
-  <h1>Albion Dashboard</h1>
+  <nav id="menu"></nav>
 
-  <select id="servidor">
-    <option value="west">Servidor: Américas (West)</option>
-    <option value="europe">Servidor: Europa</option>
-    <option value="east">Servidor: Ásia (East)</option>
-  </select>
-  <input id="busca" placeholder="Buscar item (ex: bolsa, espada, T4_BAG)" disabled>
+  <section class="hero">
+    <h1>Albion Dashboard</h1>
+    <p>Itens, receitas, preços e lucro de craft em um só lugar.</p>
+    <form id="formBusca" class="busca-hero">
+      <input id="buscaHome" placeholder="Buscar item (ex: bolsa, espada, T4_BAG)" autocomplete="off">
+      <button type="submit">Buscar</button>
+    </form>
+  </section>
 
-  <div id="precos" hidden></div>
-  <p id="aviso">Carregando itens... (pode levar alguns segundos)</p>
-  <div id="lista"></div>
+  <main id="secoes"></main>
 
+  <p class="rodape">
+    Dados dos itens: ao-bin-dumps. Preços: Albion Online Data Project (colaborativo, podem estar desatualizados).
+    Projeto de fã, sem vínculo com a Sandbox Interactive.
+  </p>
+
+  <script src="js/comum.js"></script>
   <script>
-    const URL_ITENS = "https://raw.githubusercontent.com/ao-data/ao-bin-dumps/master/formatted/items.json";
-    const campo = document.getElementById("busca");
-    const aviso = document.getElementById("aviso");
-    const lista = document.getElementById("lista");
-    const caixa = document.getElementById("precos");
-    let itens = [];
-
-    function nomeDoItem(item) {
-      const nomes = item.LocalizedNames;
-      if (!nomes) return item.UniqueName;
-      return nomes["PT-BR"] || nomes["EN-US"] || item.UniqueName;
-    }
-
-    function formatar(n) {
-      return n > 0 ? n.toLocaleString("pt-BR") : "—";
-    }
-
-    function haQuanto(data) {
-      if (!data || data.startsWith("0001")) return "—";
-      const dt = new Date(data.endsWith("Z") ? data : data + "Z");
-      const min = Math.round((Date.now() - dt) / 60000);
-      if (min < 60) return min + " min";
-      if (min < 1440) return Math.round(min / 60) + " h";
-      return Math.round(min / 1440) + " d";
-    }
-
-    function mostrar(texto) {
-      const t = texto.toLowerCase();
-      const achados = itens
-        .filter(i => (nomeDoItem(i) + " " + i.UniqueName).toLowerCase().includes(t))
-        .slice(0, 50);
-
-      lista.innerHTML = achados.map(i => `
-        <div class="item" data-id="${i.UniqueName}">
-          <img src="https://render.albiononline.com/v1/item/${i.UniqueName}.png?size=64" alt="">
-          <div>
-            <div>${nomeDoItem(i)}</div>
-            <div class="id">${i.UniqueName}</div>
-          </div>
-        </div>`).join("");
-
-      aviso.textContent = achados.length + " itens mostrados (máximo de 50). Clique em um item para ver os preços.";
-    }
-
-    async function carregarPrecos(id) {
-      const item = itens.find(i => i.UniqueName === id);
-      const servidor = document.getElementById("servidor").value;
-      caixa.hidden = false;
-      caixa.innerHTML = "Buscando preços...";
-      caixa.scrollIntoView({ behavior: "smooth" });
-
-      try {
-        const url = `https://${servidor}.albion-online-data.com/api/v2/stats/prices/${id}.json?qualities=1`;
-        const resposta = await fetch(url);
-        const dados = await resposta.json();
-        const linhas = dados.filter(d => d.sell_price_min > 0 || d.buy_price_max > 0);
-
-        if (linhas.length === 0) {
-          caixa.innerHTML = `<h2>${nomeDoItem(item)}</h2><p>Sem preços registrados para este item neste servidor.</p>`;
-          return;
-        }
-
-        const menorVenda = Math.min(...linhas.filter(d => d.sell_price_min > 0).map(d => d.sell_price_min));
-        const maiorCompra = Math.max(...linhas.map(d => d.buy_price_max));
-
-        linhas.sort((a, b) => a.city.localeCompare(b.city));
-
-        caixa.innerHTML = `
-          <h2>${nomeDoItem(item)} <span class="id">${id}</span></h2>
-          <table>
-            <tr>
-              <th>Cidade</th>
-              <th>Venda (menor)</th><th>Atualizado</th>
-              <th>Compra (maior)</th><th>Atualizado</th>
-            </tr>
-            ${linhas.map(d => `
-              <tr>
-                <td>${d.city}</td>
-                <td class="${d.sell_price_min === menorVenda ? "melhor" : ""}">${formatar(d.sell_price_min)}</td>
-                <td>${haQuanto(d.sell_price_min_date)}</td>
-                <td class="${d.buy_price_max === maiorCompra ? "melhor" : ""}">${formatar(d.buy_price_max)}</td>
-                <td>${haQuanto(d.buy_price_max_date)}</td>
-              </tr>`).join("")}
-          </table>
-          <p class="nota">Qualidade normal. Verde: menor preço de venda (onde comprar) e maior preço de compra (onde vender). Os preços são enviados por jogadores, então confira a coluna "Atualizado".</p>`;
-      } catch (erro) {
-        caixa.innerHTML = "Erro ao buscar os preços. Tente novamente.";
-      }
-    }
-
-    fetch(URL_ITENS)
-      .then(r => r.json())
-      .then(dados => {
-        itens = dados.filter(i => i.LocalizedNames);
-        campo.disabled = false;
-        mostrar("");
-      })
-      .catch(() => { aviso.textContent = "Erro ao carregar os itens."; });
-
-    campo.addEventListener("input", () => mostrar(campo.value));
-
-    lista.addEventListener("click", (e) => {
-      const alvo = e.target.closest(".item");
-      if (alvo) carregarPrecos(alvo.dataset.id);
-    });
+    montarMenu("index");
+    montarSecoes();
+    iniciarBuscaHome();
   </script>
 </body>
 </html>

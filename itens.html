@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Itens e receitas - Albion Dashboard</title>
+  <link rel="stylesheet" href="css/estilo.css">
+</head>
+<body>
+  <nav id="menu"></nav>
+  <h1>Itens e receitas</h1>
+
+  <select id="servidor">
+    <option value="west">Servidor: Américas (West)</option>
+    <option value="europe">Servidor: Europa</option>
+    <option value="east">Servidor: Ásia (East)</option>
+  </select>
+  <select id="cidadeCompra">
+    <option value="Caerleon">Materiais: Caerleon</option>
+    <option value="Bridgewatch">Materiais: Bridgewatch</option>
+    <option value="Fort Sterling">Materiais: Fort Sterling</option>
+    <option value="Lymhurst">Materiais: Lymhurst</option>
+    <option value="Martlock">Materiais: Martlock</option>
+    <option value="Thetford">Materiais: Thetford</option>
+    <option value="Brecilien">Materiais: Brecilien</option>
+  </select>
+  <input id="busca" placeholder="Buscar item (ex: bolsa, espada, T4_BAG)" disabled>
+
+  <div id="precos" class="caixa" hidden></div>
+  <div id="receita" class="caixa" hidden></div>
+  <p id="aviso">Carregando itens... (pode levar alguns segundos)</p>
+  <div id="lista"></div>
+
+  <script src="js/comum.js"></script>
+  <script src="js/itens.js"></script>
+</body>
+</html>
