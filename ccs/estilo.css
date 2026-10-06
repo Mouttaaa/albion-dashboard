@@ -1,0 +1,36 @@
+body { font-family: Arial, sans-serif; background: #1b1b1f; color: #eee; max-width: 900px; margin: 0 auto; padding: 20px; }
+h1 { margin-top: 0; }
+.sub { color: #aaa; }
+
+/* Menu */
+#menu { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid #333; }
+#menu a { color: #ccc; text-decoration: none; padding: 8px 12px; border-radius: 6px; background: #25252b; }
+#menu a:hover, #menu a.ativo { background: #3a3a44; color: #fff; }
+
+/* Cards da página principal */
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
+.card { display: block; background: #25252b; border: 1px solid #333; border-radius: 10px; padding: 16px; color: #eee; text-decoration: none; }
+a.card:hover { border-color: #5fd068; }
+.card h3 { margin: 0 0 8px; }
+.card p { margin: 0; color: #aaa; font-size: 14px; }
+.card.em-breve { opacity: 0.5; }
+.etiqueta { display: inline-block; margin-top: 10px; font-size: 12px; color: #999; }
+
+/* Formulários */
+input, select { padding: 12px; font-size: 16px; border-radius: 6px; border: none; box-sizing: border-box; margin: 0 6px 6px 0; }
+input { width: 100%; }
+
+/* Lista de itens */
+.item { display: flex; align-items: center; gap: 12px; padding: 8px; border-bottom: 1px solid #333; cursor: pointer; }
+.item:hover { background: #2a2a30; }
+.item img { width: 48px; height: 48px; }
+.id { color: #999; font-size: 12px; }
+
+/* Caixas e tabelas */
+.caixa { background: #25252b; border-radius: 8px; padding: 12px; margin: 16px 0; }
+table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid #333; }
+th { color: #aaa; font-size: 13px; }
+td img { width: 28px; height: 28px; vertical-align: middle; margin-right: 6px; }
+.melhor { color: #5fd068; font-weight: bold; }
+.nota { color: #999; font-size: 12px; margin-top: 8px; }
