@@ -4,9 +4,61 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Albion Dashboard</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #1b1b1f; color: #eee; max-width: 900px; margin: 0 auto; padding: 20px; }
+    input { width: 100%; padding: 12px; font-size: 16px; border-radius: 6px; border: none; box-sizing: border-box; }
+    .item { display: flex; align-items: center; gap: 12px; padding: 8px; border-bottom: 1px solid #333; }
+    .item img { width: 48px; height: 48px; }
+    .id { color: #999; font-size: 12px; }
+  </style>
 </head>
 <body>
   <h1>Albion Dashboard</h1>
-  <p>Meu projeto está no ar!</p>
+  <input id="busca" placeholder="Buscar item (ex: bolsa, espada, T4)" disabled>
+  <p id="aviso">Carregando itens... (pode levar alguns segundos)</p>
+  <div id="lista"></div>
+
+  <script>
+    const URL_ITENS = "https://raw.githubusercontent.com/ao-data/ao-bin-dumps/master/formatted/items.json";
+    const campo = document.getElementById("busca");
+    const aviso = document.getElementById("aviso");
+    const lista = document.getElementById("lista");
+    let itens = [];
+
+    function nomeDoItem(item) {
+      const nomes = item.LocalizedNames;
+      if (!nomes) return item.UniqueName;
+      return nomes["PT-BR"] || nomes["EN-US"] || item.UniqueName;
+    }
+
+    function mostrar(texto) {
+      const t = texto.toLowerCase();
+      const achados = itens
+        .filter(i => (nomeDoItem(i) + " " + i.UniqueName).toLowerCase().includes(t))
+        .slice(0, 50);
+
+      lista.innerHTML = achados.map(i => `
+        <div class="item">
+          <img src="https://render.albiononline.com/v1/item/${i.UniqueName}.png?size=64" alt="">
+          <div>
+            <div>${nomeDoItem(i)}</div>
+            <div class="id">${i.UniqueName}</div>
+          </div>
+        </div>`).join("");
+
+      aviso.textContent = achados.length + " itens mostrados (máximo de 50)";
+    }
+
+    fetch(URL_ITENS)
+      .then(r => r.json())
+      .then(dados => {
+        itens = dados.filter(i => i.LocalizedNames);
+        campo.disabled = false;
+        mostrar("");
+      })
+      .catch(() => { aviso.textContent = "Erro ao carregar os itens."; });
+
+    campo.addEventListener("input", () => mostrar(campo.value));
+  </script>
 </body>
 </html>
